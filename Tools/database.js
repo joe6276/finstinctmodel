@@ -119,6 +119,31 @@ async function query(query) {
     }
 }
 
+function getTodayDateAndDay() {
+  const today = new Date();
+
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const date = String(today.getDate()).padStart(2, "0");
+
+  const formattedDate = `${year}-${month}-${date}`;
+  const dayName = days[today.getDay()];
+
+  return `Today is ${formattedDate} (${dayName})`;
+}
+
+async function petSleepHelp(query) {
+  try {
+        validateQuery(query)
+        const pool = await sql.connect(config.azure)
+        const result = await pool.request().query(query);
+        return result.recordset
+    } catch (error) {
+        console.error("Query Execution Failed", error.message)
+        throw error
+    }
+}
 
 
 function registerTool(name, func, description, parameters = {}) {
@@ -165,7 +190,36 @@ function getToolDefinitions() {
   return definitions
 }
 
+registerTool(
+    'getTodayDateAndDay',
+    async (args) => {
+        return  getTodayDateAndDay()
+    },
+    "Returns  today date and  the day of the week",
+    {
+        type: "object",
+        properties: {},
+        required: []
+    }
+)
 
+registerTool(
+    'petSleepHelp',
+    async (args) => {
+        return await petSleepHelp(args.query)
+    },
+    "Run MSSQL SELECT query only, When pet is asleep the BPM in the SensorReading is below 50, use this information in the queries. DELETE, DROP, UPDATE, INSERT, and other modifying operations are strictly prohibited. Avoid NULL values",
+    {
+        type: "object",
+        properties: {
+            query: {
+                type: 'string',
+                description: "The Query to be executed"
+            }
+        },
+        required: ['query']
+    }
+)
 
 registerTool(
     'getTableNames',
@@ -199,7 +253,7 @@ registerTool(
     async (args) => {
         return await query(args.query)
     },
-    "Run MSSQL SELECT query only. DELETE, DROP, UPDATE, INSERT, and other modifying operations are strictly prohibited.",
+    "Run MSSQL SELECT query only. DELETE, DROP, UPDATE, INSERT, and other modifying operations are strictly prohibited. Avoid NULL values",
     {
         type: "object",
         properties: {
@@ -219,8 +273,8 @@ const client = new OpenAI({
 })
 
 
-async function invokeTool(message, maxIterations = 15) {
-  let messages = [{ role: "user", content: message }]
+async function invokeTool(message, DeviceserialNumber,maxIterations = 15) {
+  let messages = [{ role: "user", content: message + 'For device serialNumber'+DeviceserialNumber }]
   let iteration = 0
 
   while (iteration < maxIterations) {

@@ -20,9 +20,9 @@ async function getDeviceData(req, res) {
 async function answerQuestion(req,res) {
     try {
         
-        const {question}= req.body
+        const {question, serialNumber}= req.body
 
-        const response = await invokeTool(question)
+        const response = await invokeTool(question,serialNumber)
 
         return res.status(200).json({response})
         
