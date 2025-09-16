@@ -16,7 +16,7 @@ app.use(cors())
 app.use("/finstinct", router)
 
 app.get('/test',(req,res)=>{
-    return res.send('<h1> Hello There </h1>')
+    return res.send('<h1> Hello There !!s</h1>')
 })
 
 app.listen(process.env.PORT, ()=>{

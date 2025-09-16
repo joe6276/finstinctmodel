@@ -5,7 +5,7 @@ const router = Router()
 
 
 router.get("/test/:slug", getDeviceData)
-router.get("/qa",answerQuestion )
+router.post("/qa",answerQuestion )
 
 module.exports={
     router
