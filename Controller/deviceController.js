@@ -2,6 +2,7 @@ const axios = require("axios")
 const { getPetHealth } = require("../Models/index")
 const { invokeTool } = require("../Tools/database")
 const { json } = require("express")
+const { invokeLocation } = require("../Tools/location")
 
 async function getDeviceData(req, res) {
     try {
@@ -33,7 +34,25 @@ async function answerQuestion(req,res) {
     }
 }
 
+
+
+async function answerLocations(req,res) {
+    try {
+        
+        const {question, serialNumber}= req.body
+
+        const response = await invokeLocation(question,serialNumber)
+
+        return res.status(200).json({response})
+        
+    } catch (error) {
+        
+        return res.status(500).json(error.message)
+        
+    }
+}
 module.exports = {
     getDeviceData,
-    answerQuestion
+    answerQuestion,
+    answerLocations
 }
