@@ -33,45 +33,6 @@ const config = {
 
 const tools = new Map()
 
-async function getTableNames() {
-    const query = `
-            SELECT TABLE_NAME 
-            FROM INFORMATION_SCHEMA.TABLES 
-            WHERE TABLE_TYPE = 'BASE TABLE'
-            ORDER BY TABLE_NAME
-        `;
-    const pool = await sql.connect(config.azure)
-    const result = await pool.request().query(query);
-
-    return result.recordset
-
-}
-
-async function getTableInfo() {
-    const query = `
-            SELECT 
-                t.TABLE_SCHEMA,
-                t.TABLE_NAME,
-                c.COLUMN_NAME,
-                c.DATA_TYPE,
-                c.IS_NULLABLE,
-                c.COLUMN_DEFAULT
-            FROM INFORMATION_SCHEMA.TABLES t
-            JOIN INFORMATION_SCHEMA.COLUMNS c ON t.TABLE_NAME = c.TABLE_NAME
-            WHERE t.TABLE_TYPE = 'BASE TABLE'
-            ORDER BY t.TABLE_NAME, c.ORDINAL_POSITION
-        `;
-
-    try {
-        const pool = await sql.connect(config.azure)
-        const result = await pool.request().query(query);
-
-        return result.recordset
-    } catch (error) {
-        console.error('Failed to get table info:', error.message);
-        return [];
-    }
-}
 function validateQuery(query) {
     const normalizedQuery = query.trim().toLowerCase();
 
@@ -135,17 +96,6 @@ function getTodayDateAndDay() {
     return `Today is ${formattedDate} (${dayName})`;
 }
 
-async function petSleepHelp(query) {
-    try {
-        validateQuery(query)
-        const pool = await sql.connect(config.azure)
-        const result = await pool.request().query(query);
-        return result.recordset
-    } catch (error) {
-        console.error("Query Execution Failed", error.message)
-        throw error
-    }
-}
 
 
 function registerTool(name, func, description, parameters = {}) {
@@ -205,57 +155,14 @@ registerTool(
     }
 )
 
-registerTool(
-    'petSleepHelp',
-    async (args) => {
-        return await petSleepHelp(args.query)
-    },
-    "Run MSSQL SELECT query only, When pet is asleep the BPM in the SensorReading is below 50, use this information in the queries. DELETE, DROP, UPDATE, INSERT, and other modifying operations are strictly prohibited. Avoid NULL values",
-    {
-        type: "object",
-        properties: {
-            query: {
-                type: 'string',
-                description: "The Query to be executed"
-            }
-        },
-        required: ['query']
-    }
-)
 
-registerTool(
-    'getTableNames',
-    async (args) => {
-        return await getTableNames()
-    },
-    "List the tables available in the database by name",
-    {
-        type: "object",
-        properties: {},
-        required: []
-    }
-)
-
-
-registerTool(
-    'getTableInfo',
-    async (args) => {
-        return await getTableInfo()
-    },
-    "List Schema available, including all the columns , each column the datatype, if column is nullable , columns default values and  the table a column belongs to",
-    {
-        type: "object",
-        properties: {},
-        required: []
-    }
-)
 
 registerTool(
     'query',
     async (args) => {
         return await query(args.query)
     },
-    "Run MSSQL SELECT query only. DELETE, DROP, UPDATE, INSERT, and other modifying operations are strictly prohibited. Avoid NULL values",
+    "Run MSSQL SELECT query only , You are interacting with only one table called Memory. DELETE, DROP, UPDATE, INSERT, and other modifying operations are strictly prohibited. Avoid NULL values",
     {
         type: "object",
         properties: {
@@ -277,6 +184,14 @@ const client = new OpenAI({
 
 async function invokeTool(message, DeviceserialNumber, userId, maxIterations = 15) {
 
+    try {
+
+
+        var response = await axios.get(`https://finstinctbackend-avacf2bca2cxcxcf.eastus-01.azurewebsites.net/api/Payment/${userId}`)
+        var res = response.data
+      
+        
+        if (res){
             let messages = [{ role: "user", content: message + 'For device serialNumber' + DeviceserialNumber }]
             let iteration = 0
 
@@ -329,7 +244,13 @@ async function invokeTool(message, DeviceserialNumber, userId, maxIterations = 1
             }
 
             return "Max iterations reached"
-        
+        } else {
+            return "Kindly Subscribe"
+        }
+    } catch (error) {
+  
+        return "Kindly Subscribe"
+    }
 
 }
 
@@ -339,7 +260,7 @@ module.exports = {
     invokeTool
 }
 async function run(){
-    const result= await invokeTool("Highest GyroY value for device last friday","ESP32_SENSOR_003",7)
+    const result= await invokeTool("Why was his activity low today","ESP32_SENSOR_003",7)
     //   const result= await invokeTool("DELETE all records")
     console.log(result);
 }

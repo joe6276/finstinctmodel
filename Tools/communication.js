@@ -266,11 +266,7 @@ const client = new OpenAI({
 
 
 async function invokeLocation(message, DeviceserialNumber, userId,maxIterations = 15) {
-try {
 
-    var response = await axios.get(`https://finstinctbackend-avacf2bca2cxcxcf.eastus-01.azurewebsites.net/api/Payment/${userId}`)
-    var res= response.data
-     if(res){
      let messages = [{ role: "user", content: message + 'For device serialNumber'+DeviceserialNumber + ", be very strict with the date"}]
   let iteration = 0
 
@@ -323,12 +319,6 @@ try {
   }
 
   return "Max iterations reached"
- }else{
-    return "Kindly Subscribe"
- }
-} catch (error) {
-     return "Kindly Subscribe"
-}
 
 }
 
