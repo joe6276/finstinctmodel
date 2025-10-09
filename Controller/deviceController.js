@@ -3,6 +3,8 @@ const { getPetHealth } = require("../Models/index")
 const { invokeTool } = require("../Tools/database")
 const { json } = require("express")
 const { invokeLocation } = require("../Tools/location")
+const { strategistTool } = require("../Tools/strategist")
+const { invokeCommunication } = require("../Tools/communication")
 
 async function getDeviceData(req, res) {
     try {
@@ -21,9 +23,27 @@ async function getDeviceData(req, res) {
 async function answerQuestion(req,res) {
     try {
         
-        const {question, serialNumber}= req.body
+        const {question, userId,serialNumber}= req.body
 
-        const response = await invokeTool(question,serialNumber)
+        const response = await invokeTool(question,serialNumber,userId)
+
+        return res.status(200).json({response})
+        
+    } catch (error) {
+        
+        return res.status(500).json(error.message)
+        
+    }
+}
+
+
+
+async function answerQuestion(req,res) {
+    try {
+        
+        const {question, userId,serialNumber}= req.body
+
+        const response = await invokeTool(question,serialNumber,userId)
 
         return res.status(200).json({response})
         
@@ -39,9 +59,42 @@ async function answerQuestion(req,res) {
 async function answerLocations(req,res) {
     try {
         
-        const {question, serialNumber}= req.body
+        const {question, userId,serialNumber}= req.body
 
-        const response = await invokeLocation(question,serialNumber)
+        const response = await invokeLocation(question,serialNumber,userId)
+
+        return res.status(200).json({response})
+        
+    } catch (error) {
+        
+        return res.status(500).json(error.message)
+        
+    }
+}
+
+
+async function communicationFunc(req,res) {
+    try {
+        
+        const {question, userId,serialNumber}= req.body
+
+        const response = await invokeCommunication(question,serialNumber,userId)
+
+        return res.status(200).json({response})
+        
+    } catch (error) {
+        
+        return res.status(500).json(error.message)
+        
+    }
+}
+
+async function strategistFunc(req,res) {
+    try {
+        
+        const {question, userId,serialNumber}= req.body
+
+        const response = await strategistTool(question,serialNumber,userId)
 
         return res.status(200).json({response})
         
@@ -54,5 +107,7 @@ async function answerLocations(req,res) {
 module.exports = {
     getDeviceData,
     answerQuestion,
-    answerLocations
+    answerLocations,
+    strategistFunc,
+    communicationFunc
 }

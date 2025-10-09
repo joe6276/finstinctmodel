@@ -341,11 +341,11 @@ async function invokeLocation(message, DeviceserialNumber, userId, maxIterations
 module.exports = {
     invokeLocation
 }
-async function run(){
-    const result= await invokeLocation("Where did we walk today","ESP32_SENSOR_003",77)
-    //   const result= await invokeLocation("DELETE all records")
-    console.log(result);
-}
+// async function run(){
+//     const result= await invokeLocation("Where did we walk today","ESP32_SENSOR_003",77)
+//     //   const result= await invokeLocation("DELETE all records")
+//     console.log(result);
+// }
 
 
-run()
+// run()

@@ -338,11 +338,11 @@ async function invokeTool(message, DeviceserialNumber, userId, maxIterations = 1
 module.exports = {
     invokeTool
 }
-async function run(){
-    const result= await invokeTool("Highest GyroY value for device last friday","ESP32_SENSOR_003",7)
-    //   const result= await invokeTool("DELETE all records")
-    console.log(result);
-}
+// async function run(){
+//     const result= await invokeTool("Highest GyroY value for device last friday","ESP32_SENSOR_003",7)
+//     //   const result= await invokeTool("DELETE all records")
+//     console.log(result);
+// }
 
 
-run()
+// run()

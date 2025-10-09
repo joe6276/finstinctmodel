@@ -265,7 +265,7 @@ const client = new OpenAI({
 })
 
 
-async function invokeLocation(message, DeviceserialNumber, userId,maxIterations = 15) {
+async function invokeCommunication(message, DeviceserialNumber, userId,maxIterations = 15) {
 
      let messages = [{ role: "user", content: message + 'For device serialNumber'+DeviceserialNumber + ", be very strict with the date"}]
   let iteration = 0
@@ -325,13 +325,13 @@ async function invokeLocation(message, DeviceserialNumber, userId,maxIterations 
 
 
 module.exports={
-    invokeLocation
+    invokeCommunication
 }
-async function run(){
-    const result= await invokeLocation("How was our walk today.","ESP32_SENSOR_003",7)
-    //   const result= await invokeLocation("DELETE all records")
-    console.log(result);
-}
+// async function run(){
+//     const result= await invokeCommunication("How was our walk today.","ESP32_SENSOR_003",7)
+//     //   const result= await invokeLocation("DELETE all records")
+//     console.log(result);
+// }
 
 
-run()
+// run()

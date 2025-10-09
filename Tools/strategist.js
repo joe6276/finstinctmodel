@@ -182,7 +182,7 @@ const client = new OpenAI({
 })
 
 
-async function invokeTool(message, DeviceserialNumber, userId, maxIterations = 15) {
+async function strategistTool(message, DeviceserialNumber, userId, maxIterations = 15) {
 
     try {
 
@@ -257,13 +257,13 @@ async function invokeTool(message, DeviceserialNumber, userId, maxIterations = 1
 
 
 module.exports = {
-    invokeTool
+    strategistTool
 }
-async function run(){
-    const result= await invokeTool("Why was his activity low today","ESP32_SENSOR_003",7)
-    //   const result= await invokeTool("DELETE all records")
-    console.log(result);
-}
+// async function run(){
+//     const result= await strategistTool("Why was his activity low today","ESP32_SENSOR_003",7)
+//     //   const result= await strategistTool("DELETE all records")
+//     console.log(result);
+// }
 
 
-run()
+// run()
