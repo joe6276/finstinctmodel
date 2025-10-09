@@ -6,6 +6,7 @@ const { stringify } = require("querystring")
 const OpenAI = require("openai")
 const { addMemory } = require("../Memory")
 const axios = require('axios')
+
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
 const config = {
@@ -15,10 +16,10 @@ const config = {
     },
 
     azure: {
-        server: process.env.AZURE_SERVER,
-        database: process.env.AZURE_DATABASE,
-        user: process.env.AZURE_USERNAME,
-        password: process.env.AZURE_PASSWORD,
+        server: process.env.AZURE_SERVER ,
+        database: process.env.AZURE_DATABASE ,
+        user: process.env.AZURE_USERNAME ,
+        password: process.env.AZURE_PASSWORD ,
         port: 1433,
         options: {
             encrypt: true, // Required for Azure
@@ -73,7 +74,7 @@ async function getTableInfo() {
 }
 function validateQuery(query) {
     const normalizedQuery = query.trim().toLowerCase();
-
+    
     // List of dangerous operations to block
     const dangerousOperations = [
         'delete',
@@ -84,14 +85,14 @@ function validateQuery(query) {
         'insert',
         'update'
     ];
-
+    
     // Check if query starts with any dangerous operation
     for (const operation of dangerousOperations) {
         if (normalizedQuery.startsWith(operation)) {
             throw new Error('Operation not allowed.');
         }
     }
-
+    
     // Additional check for dangerous keywords anywhere in the query
     const dangerousKeywords = ['drop table', 'delete from', 'truncate table'];
     for (const keyword of dangerousKeywords) {
@@ -99,13 +100,13 @@ function validateQuery(query) {
             throw new Error('Operation not allowed.');
         }
     }
-
+    
     // Ensure query starts with SELECT (allowing for whitespace and comments)
     const queryWithoutComments = normalizedQuery.replace(/\/\*.*?\*\//g, '').replace(/--.*$/gm, '').trim();
     if (!queryWithoutComments.startsWith('select')) {
         throw new Error('Operation not allowed.');
     }
-
+    
     return true;
 }
 async function query(query) {
@@ -121,20 +122,20 @@ async function query(query) {
 }
 
 function getTodayDateAndDay() {
-    const today = new Date();
+  const today = new Date();
 
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const date = String(today.getDate()).padStart(2, "0");
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const date = String(today.getDate()).padStart(2, "0");
 
-    const formattedDate = `${year}-${month}-${date}`;
-    const dayName = days[today.getDay()];
+  const formattedDate = `${year}-${month}-${date}`;
+  const dayName = days[today.getDay()];
 
-    return `Today is ${formattedDate} (${dayName})`;
+  return `Today is ${formattedDate} (${dayName})`;
 }
 
-function expandOnStats() {
+function expandOnStats(){
     const result = " For anything about walktime, playTime , the route , the distance , the userId and the SerialNumber get them from the stats Table "
     return result
 }
@@ -172,24 +173,24 @@ async function executeTool(name, args = {}) {
 
 
 function getToolDefinitions() {
-    const definitions = []
-    for (const [name, tool] of tools) {
-        definitions.push({
-            type: "function",  // 👈 REQUIRED
-            function: {
-                name: tool.name,
-                description: tool.description,
-                parameters: tool.parameters,
-            },
-        })
-    }
-    return definitions
+  const definitions = []
+  for (const [name, tool] of tools) {
+    definitions.push({
+      type: "function",  // 👈 REQUIRED
+      function: {
+        name: tool.name,
+        description: tool.description,
+        parameters: tool.parameters,
+      },
+    })
+  }
+  return definitions
 }
 
 registerTool(
     'getTodayDateAndDay',
     async (args) => {
-        return getTodayDateAndDay()
+        return  getTodayDateAndDay()
     },
     "Returns  today date and  the day of the week",
     {
@@ -202,9 +203,9 @@ registerTool(
 registerTool(
     'expandOnStats',
     async (args) => {
-        return expandOnStats()
+        return  expandOnStats()
     },
-    " For anything about walktime, playTime , the route , the distance , the userId and the SerialNumber get them from the stats Table ",
+    " For anything about walktime, playTime , the route , the distance , the userId and the SerialNumber get them from the stats Table, This information is for a Pet  ",
     {
         type: "object",
         properties: {},
@@ -260,89 +261,84 @@ registerTool(
 
 
 const client = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 })
 
 
-async function invokeLocation(message, DeviceserialNumber, userId, maxIterations = 15) {
+async function invokeLocation(message, DeviceserialNumber, userId,maxIterations = 15) {
+try {
 
-    try {
-        var response = await axios.get(`https://finstinctbackend-avacf2bca2cxcxcf.eastus-01.azurewebsites.net/api/Payment/${userId}`)
-        var res = response.data
+    var response = await axios.get(`https://finstinctbackend-avacf2bca2cxcxcf.eastus-01.azurewebsites.net/api/Payment/${userId}`)
+    var res= response.data
+     if(res){
+     let messages = [{ role: "user", content: message + 'For device serialNumber'+DeviceserialNumber + ", be very strict with the date"}]
+  let iteration = 0
 
-        if (res) {
-            let messages = [{ role: "user", content: message + 'For device serialNumber' + DeviceserialNumber }]
-            let iteration = 0
+  while (iteration < maxIterations) {
+    iteration++
 
-            while (iteration < maxIterations) {
-                iteration++
+    const response = await client.chat.completions.create({
+      model: "gpt-4o-mini", // or "gpt-4o", "gpt-4.1"
+      messages,
+      tools: getToolDefinitions(),
+      tool_choice: "auto", // let GPT decide
+    })
 
-                const response = await client.chat.completions.create({
-                    model: "gpt-4o-mini", // or "gpt-4o", "gpt-4.1"
-                    messages,
-                    tools: getToolDefinitions(),
-                    tool_choice: "auto", // let GPT decide
-                })
+    const messageResponse = response.choices[0].message
+    messages.push(messageResponse)
 
-                const messageResponse = response.choices[0].message
-                messages.push(messageResponse)
+    // If GPT calls a tool
+    if (messageResponse.tool_calls) {
+      for (const toolCall of messageResponse.tool_calls) {
+        const toolName = toolCall.function.name
+        const toolArgs = JSON.parse(toolCall.function.arguments)
 
-                // If GPT calls a tool
-                if (messageResponse.tool_calls) {
-                    for (const toolCall of messageResponse.tool_calls) {
-                        const toolName = toolCall.function.name
-                        const toolArgs = JSON.parse(toolCall.function.arguments)
+        console.log("👉 ChatGPT requested tool:", toolName)
+        console.log("🧾 With args:", toolArgs)
 
-                        console.log("👉 ChatGPT requested tool:", toolName)
-                        console.log("🧾 With args:", toolArgs)
+        try {
+          const toolResult = await executeTool(toolName, toolArgs)
+          console.log("✅ Tool result:", JSON.stringify(toolResult, null, 2))
 
-                        try {
-                            const toolResult = await executeTool(toolName, toolArgs)
-                            console.log("✅ Tool result:", JSON.stringify(toolResult, null, 2))
-
-                            // Send tool result back
-                            messages.push({
-                                role: "tool",
-                                tool_call_id: toolCall.id,
-                                content: JSON.stringify(toolResult),
-                            })
-                        } catch (error) {
-                            messages.push({
-                                role: "tool",
-                                tool_call_id: toolCall.id,
-                                content: `Error: ${error.message}`,
-                            })
-                        }
-                    }
-                    continue // loop again
-                }
-
-                // Otherwise return GPT’s text
-                await addMemory(message, messageResponse.content, DeviceserialNumber)
-                return messageResponse.content
-            }
-
-            return "Max iterations reached"
-        } else {
-            return "Kindly Subscribe"
+          // Send tool result back
+          messages.push({
+            role: "tool",
+            tool_call_id: toolCall.id,
+            content: JSON.stringify(toolResult),
+          })
+        } catch (error) {
+          messages.push({
+            role: "tool",
+            tool_call_id: toolCall.id,
+            content: `Error: ${error.message}`,
+          })
         }
-
-    } catch (error) {
-        return "Kindly Subscribe"
+      }
+      continue // loop again
     }
 
+    // Otherwise return GPT’s text
+    await addMemory(message,messageResponse.content, DeviceserialNumber)
+    return messageResponse.content
+  }
 
-
+  return "Max iterations reached"
+ }else{
+    return "Kindly Subscribe"
+ }
+} catch (error) {
+     return "Kindly Subscribe"
+}
 
 }
 
 
 
-module.exports = {
+module.exports={
     invokeLocation
 }
 async function run(){
-    const result= await invokeLocation("Where did we walk today","ESP32_SENSOR_003",77)
+    const result= await invokeLocation("How was our walk today.","ESP32_SENSOR_003",7)
     //   const result= await invokeLocation("DELETE all records")
     console.log(result);
 }
