@@ -267,6 +267,8 @@ const client = new OpenAI({
 
 async function invokeCommunication(message, DeviceserialNumber, userId,maxIterations = 15) {
 
+    await addMemory(message, DeviceserialNumber,"Communicator","user",userId)
+
      let messages = [{ role: "user", content: message + 'For device serialNumber'+DeviceserialNumber + ", be very strict with the date"}]
   let iteration = 0
 
@@ -314,7 +316,7 @@ async function invokeCommunication(message, DeviceserialNumber, userId,maxIterat
     }
 
     // Otherwise return GPT’s text
-    await addMemory(message,messageResponse.content, DeviceserialNumber)
+    await addMemory(messageResponse.content, DeviceserialNumber,"Communicator","assistant",userId)
     return messageResponse.content
   }
 
@@ -328,7 +330,7 @@ module.exports={
     invokeCommunication
 }
 // async function run(){
-//     const result= await invokeCommunication("How was our walk today.","ESP32_SENSOR_003",7)
+//     const result= await invokeCommunication("How was our walk today.","ESP32_SENSOR_003","7")
 //     //   const result= await invokeLocation("DELETE all records")
 //     console.log(result);
 // }

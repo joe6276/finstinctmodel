@@ -265,10 +265,12 @@ const client = new OpenAI({
 
 
 async function invokeLocation(message, DeviceserialNumber, userId, maxIterations = 15) {
-
+await addMemory(message, DeviceserialNumber,"Choreographer","user",userId)
     try {
-        var response = await axios.get(`https://finstinctbackend-avacf2bca2cxcxcf.eastus-01.azurewebsites.net/api/Payment/${userId}`)
+        var response = await axios.get(`https://finstinctbackend1-e2atcehsfngmfcc2.eastus-01.azurewebsites.net/api/Payment/${userId}`)
         var res = response.data
+        console.log(res);
+        
 
         if (res) {
             let messages = [{ role: "user", content: message + 'For device serialNumber' + DeviceserialNumber }]
@@ -318,7 +320,7 @@ async function invokeLocation(message, DeviceserialNumber, userId, maxIterations
                 }
 
                 // Otherwise return GPT’s text
-                await addMemory(message, messageResponse.content, DeviceserialNumber)
+                await addMemory(messageResponse.content, DeviceserialNumber,"Choreographer","assistant",userId)
                 return messageResponse.content
             }
 
@@ -342,7 +344,7 @@ module.exports = {
     invokeLocation
 }
 // async function run(){
-//     const result= await invokeLocation("Where did we walk today","ESP32_SENSOR_003",77)
+//     const result= await invokeLocation("Where did we walk today","ESP32_SENSOR_003",'7')
 //     //   const result= await invokeLocation("DELETE all records")
 //     console.log(result);
 // }

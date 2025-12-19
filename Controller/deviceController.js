@@ -1,16 +1,16 @@
 const axios = require("axios")
 const { getPetHealth } = require("../Models/index")
 const { invokeTool } = require("../Tools/database")
-const { json } = require("express")
 const { invokeLocation } = require("../Tools/location")
 const { strategistTool } = require("../Tools/strategist")
 const { invokeCommunication } = require("../Tools/communication")
+const { getHistory } = require("../Memory")
 
 async function getDeviceData(req, res) {
     try {
         const search = req.params['slug']
 
-        const response = (await axios.get(`https://finstinctbackend-avacf2bca2cxcxcf.eastus-01.azurewebsites.net/api/SensorReading?deviceName=${search}`))
+        const response = (await axios.get(`https://finstinctbackend1-e2atcehsfngmfcc2.eastus-01.azurewebsites.net/api/SensorReading?deviceName=${search}`))
         const result = await response.data       
         const res = await getPetHealth('Have there been any temperature alerts?',result)
          return res.status(500).json(res)
@@ -25,7 +25,7 @@ async function answerQuestion(req,res) {
         
         const {question, userId,serialNumber}= req.body
 
-        const response = await invokeTool(question,serialNumber,userId)
+        const response = await invokeTool(question,serialNumber,userId.toString())
 
         return res.status(200).json({response})
         
@@ -43,7 +43,7 @@ async function answerQuestion(req,res) {
         
         const {question, userId,serialNumber}= req.body
 
-        const response = await invokeTool(question,serialNumber,userId)
+        const response = await invokeTool(question,serialNumber,userId.toString())
 
         return res.status(200).json({response})
         
@@ -61,7 +61,7 @@ async function answerLocations(req,res) {
         
         const {question, userId,serialNumber}= req.body
 
-        const response = await invokeLocation(question,serialNumber,userId)
+        const response = await invokeLocation(question,serialNumber,userId.toString())
 
         return res.status(200).json({response})
         
@@ -78,7 +78,7 @@ async function communicationFunc(req,res) {
         
         const {question, userId,serialNumber}= req.body
 
-        const response = await invokeCommunication(question,serialNumber,userId)
+        const response = await invokeCommunication(question,serialNumber,userId.toString())
 
         return res.status(200).json({response})
         
@@ -94,7 +94,23 @@ async function strategistFunc(req,res) {
         
         const {question, userId,serialNumber}= req.body
 
-        const response = await strategistTool(question,serialNumber,userId)
+        const response = await strategistTool(question,serialNumber,userId.toString())
+
+        return res.status(200).json({response})
+        
+    } catch (error) {
+        
+        return res.status(500).json(error.message)
+        
+    }
+}
+
+async function getMessageHistory(req,res) {
+    try {
+        
+        const {userId,model}= req.body
+
+        const response = await getHistory(userId.toString(), model)
 
         return res.status(200).json({response})
         
@@ -109,5 +125,6 @@ module.exports = {
     answerQuestion,
     answerLocations,
     strategistFunc,
-    communicationFunc
+    communicationFunc,
+    getMessageHistory
 }

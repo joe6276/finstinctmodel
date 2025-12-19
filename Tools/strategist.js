@@ -185,9 +185,9 @@ const client = new OpenAI({
 async function strategistTool(message, DeviceserialNumber, userId, maxIterations = 15) {
 
     try {
+        await addMemory(message, DeviceserialNumber,"Strategist","user",userId)
 
-
-        var response = await axios.get(`https://finstinctbackend-avacf2bca2cxcxcf.eastus-01.azurewebsites.net/api/Payment/${userId}`)
+        var response = await axios.get(`https://finstinctbackend1-e2atcehsfngmfcc2.eastus-01.azurewebsites.net//api/Payment/${userId}`)
         var res = response.data
       
         
@@ -239,7 +239,7 @@ async function strategistTool(message, DeviceserialNumber, userId, maxIterations
                 }
 
                 // Otherwise return GPT’s text
-                await addMemory(message, messageResponse.content, DeviceserialNumber)
+                await addMemory(messageResponse.content, DeviceserialNumber,"Strategist","assistant",userId)
                 return messageResponse.content
             }
 
@@ -260,7 +260,7 @@ module.exports = {
     strategistTool
 }
 // async function run(){
-//     const result= await strategistTool("Why was his activity low today","ESP32_SENSOR_003",7)
+//     const result= await strategistTool("Why was his activity low today","ESP32_SENSOR_003",'7')
 //     //   const result= await strategistTool("DELETE all records")
 //     console.log(result);
 // }

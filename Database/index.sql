@@ -2,11 +2,14 @@
 
 CREATE TABLE Memory(
     Id INT IDENTITY(1,1) PRIMARY KEY,
-    Question NVARCHAR(MAX),
-    Answer NVARCHAR(MAX),
+    Content NVARCHAR(MAX),
     SerialNumber  NVARCHAR(300),
-    CreatedAt DATETIME2 DEFAULT SYSDATETIME()
+    CreatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    Role NVARCHAR(MAX),
+    Model NVARCHAR(MAX),
+    UserId NVARCHAR(MAX)
 )
 
+SELECT * FROM Memory
 
 DROP TABLE Memory

@@ -276,7 +276,7 @@ const client = new OpenAI({
 
 
 async function invokeTool(message, DeviceserialNumber, userId, maxIterations = 15) {
-
+            await addMemory(message, DeviceserialNumber,"Watcher","user",userId)
             let messages = [{ role: "user", content: message + 'For device serialNumber' + DeviceserialNumber }]
             let iteration = 0
 
@@ -324,11 +324,12 @@ async function invokeTool(message, DeviceserialNumber, userId, maxIterations = 1
                 }
 
                 // Otherwise return GPT’s text
-                await addMemory(message, messageResponse.content, DeviceserialNumber)
+                await addMemory(messageResponse.content, DeviceserialNumber,"Watcher","assistant",userId)
                 return messageResponse.content
             }
 
             return "Max iterations reached"
+
         
 
 }
@@ -338,9 +339,11 @@ async function invokeTool(message, DeviceserialNumber, userId, maxIterations = 1
 module.exports = {
     invokeTool
 }
+
+
 // async function run(){
-//     const result= await invokeTool("Highest GyroY value for device last friday","ESP32_SENSOR_003",7)
-//     //   const result= await invokeTool("DELETE all records")
+//     const result= await invokeTool("How was sleep last night.","ESP32_SENSOR_003","7")
+//     //   const result= await invokeLocation("DELETE all records")
 //     console.log(result);
 // }
 
