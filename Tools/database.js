@@ -4,7 +4,7 @@ const path = require("path")
 const dotenv = require("dotenv")
 const { stringify } = require("querystring")
 const OpenAI = require("openai")
-const { addMemory } = require("../Memory")
+const { addMemory, getRoleContentByUserAndModel } = require("../Memory")
 const axios = require('axios')
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
@@ -277,7 +277,8 @@ const client = new OpenAI({
 
 async function invokeTool(message, DeviceserialNumber, userId, maxIterations = 15) {
             await addMemory(message, DeviceserialNumber,"Watcher","user",userId)
-            let messages = [{ role: "user", content: message + 'For device serialNumber' + DeviceserialNumber }]
+            let history = await getRoleContentByUserAndModel(userId,'Watcher')
+            let messages = [...history, { role: "user", content: message + 'For device serialNumber' + DeviceserialNumber }]
             let iteration = 0
 
             while (iteration < maxIterations) {

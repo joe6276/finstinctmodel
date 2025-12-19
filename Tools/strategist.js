@@ -4,7 +4,7 @@ const path = require("path")
 const dotenv = require("dotenv")
 const { stringify } = require("querystring")
 const OpenAI = require("openai")
-const { addMemory } = require("../Memory")
+const { addMemory, getRoleContentByUserAndModel } = require("../Memory")
 const axios = require('axios')
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
@@ -188,11 +188,11 @@ async function strategistTool(message, DeviceserialNumber, userId, maxIterations
         await addMemory(message, DeviceserialNumber,"Strategist","user",userId)
 
         var response = await axios.get(`https://finstinctbackend1-e2atcehsfngmfcc2.eastus-01.azurewebsites.net//api/Payment/${userId}`)
-        var res = response.data
-      
+        var res = response.data     
         
         if (res){
-            let messages = [{ role: "user", content: message + 'For device serialNumber' + DeviceserialNumber }]
+            let history = await getRoleContentByUserAndModel(userId,'Strategist')
+            let messages = [...history,{ role: "user", content: message + 'For device serialNumber' + DeviceserialNumber }]
             let iteration = 0
 
             while (iteration < maxIterations) {
@@ -245,11 +245,15 @@ async function strategistTool(message, DeviceserialNumber, userId, maxIterations
 
             return "Max iterations reached"
         } else {
+
+            console.log(res);
+            
             return "Kindly Subscribe"
         }
     } catch (error) {
-  
-        return "Kindly Subscribe"
+        console.log(error);
+        
+        return error
     }
 
 }

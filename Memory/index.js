@@ -76,6 +76,38 @@ async function getHistory(userId, model) {
 }
 
 
+async function getRoleContentByUserAndModel(userId, model) {
+  if (!userId || !model) {
+    throw new Error("userId and model are required");
+  }
+
+  try {
+    const pool = await sql.connect(sqlConfig);
+
+    const res = await pool.request()
+      .input("UserId", sql.NVarChar(100), userId)
+      .input("Model", sql.NVarChar(100), model)
+      .query(`
+        SELECT TOP (10)
+          Role AS role,
+          Content AS content
+        FROM Memory
+        WHERE UserId = @UserId
+          AND Model = @Model
+        ORDER BY CreatedAt ASC;
+      `);
+
+    // Explicit guarantee
+    return Array.isArray(res.recordset) ? res.recordset : [];
+        
+  } catch (error) {
+    console.error("getRoleContentByUserAndModel error:", error);
+    return [];
+  }
+}
+
+
+
 
 
 // async function run(){
@@ -86,7 +118,7 @@ async function getHistory(userId, model) {
 //   "user",
 //   "user-12345"
 // );
-// const result= await getHistory('7', 'Strategist')
+// const result= await getRoleContentByUserAndModel('7', 'Strategist')
 // console.log(result);
 // }
 
@@ -95,5 +127,6 @@ async function getHistory(userId, model) {
 
 module.exports = {
   addMemory,
-  getHistory
+  getHistory,
+  getRoleContentByUserAndModel
 }
